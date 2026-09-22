@@ -11,7 +11,10 @@ const clean=(s:string)=>s.toLowerCase().trim().replace(/[^a-z0-9]/g,"");
 const makeCode=()=>Array.from({length:4},()=>"ABCDEFGHJKLMNPQRSTUVWXYZ"[Math.floor(Math.random()*24)]).join("");
 const makeChoices=()=>[...WORDS].sort(()=>Math.random()-.5).slice(0,3);
 
-const redis = Redis.fromEnv();
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL || process.env.UPSTASH_REDIS_REST_KV_REST_API_URL || "",
+  token: process.env.UPSTASH_REDIS_REST_TOKEN || process.env.UPSTASH_REDIS_REST_KV_REST_API_TOKEN || "",
+});
 const key=(code:string)=>`sketch-rush:${code}`;
 async function readRoom(code:string):Promise<Room|null>{return await redis.get<Room>(key(code))}
 async function save(room:Room){await redis.set(key(room.code),room,{ex:86400})}
